@@ -1,7 +1,7 @@
 FROM openjdk:18-slim as builder
 WORKDIR application
-ADD target/authentication-service-0.0.1-SNAPSHOT.jar ./
-RUN java -Djarmode=layertools -jar authentication-service-0.0.1-SNAPSHOT.jar extract
+ADD maven/${project.build.finalName}.jar ./
+RUN java -Djarmode=layertools -jar ${project.build.finalName}.jar.jar extract
 
 FROM openjdk:18-slim
 WORKDIR application
