@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: auth-deployment
+  name: auth-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-deployment
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: auth-deployment
+    spec:
+      containers:
+      - image: authentication-service:0.0.1-SNAPSHOT  # Specify version instead of 'latest' to prevent loading from internet
+        name: authentication-service
+        resources: {}
+        env:
+          - name: SERVER_PORT
+            value: "8081"
+          - name: SPRING_DATASOURCE_USER
+            value: root
+          - name: SPRING_DATASOURCE_PASSWORD
+            value: password
+          - name: SPRING_JPA_HIBERNATE_DDL-AUTO
+            value: update
+          - name: SPRING_DATASOURCE_URL
+            value: jdbc:mysql://mysql:3306/mysql
+          - name: SPRING_ARTEMIS_HOST
+            value: jms
+status: {}
