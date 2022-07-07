@@ -1,7 +1,7 @@
 FROM openjdk:18-slim as builder
 WORKDIR application
 ADD maven/${project.build.finalName}.jar ./
-RUN java -Djarmode=layertools -jar ${project.build.finalName}.jar.jar extract
+RUN java -Djarmode=layertools -jar ${project.build.finalName}.jar extract
 
 FROM openjdk:18-slim
 WORKDIR application
