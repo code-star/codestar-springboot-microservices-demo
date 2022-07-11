@@ -12,12 +12,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
@@ -49,14 +50,11 @@ class AuthenticationServiceApplicationTests {
         }
 
         @Test
-        void canAuthorizePreloadedUser() throws Exception {
-            log.info(getCredentialsJSONString("Audrey Chan", "welcome01"));
-
-            MvcResult result = mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
+        void canAuthenticatePreloadedUser() throws Exception {
+            mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
                             .content(getCredentialsJSONString("Audrey Chan", "welcome01")))
                     .andExpect(status().isOk())
-                    .andReturn();
-            assertThat(result.getResponse().getContentAsString()).hasSizeGreaterThan(0);
+                    .andExpect(jsonPath("$.token").isNotEmpty());
         }
     }
 
@@ -73,11 +71,10 @@ class AuthenticationServiceApplicationTests {
         @Test
         @Order(2)
         void authenticateUser() throws Exception {
-            MvcResult result = mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
+            mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
                     .content(getCredentialsJSONString("Foo-Bar", "p4ssw0rd")))
                     .andExpect(status().isOk())
-                    .andReturn();
-            assertThat(result.getResponse().getContentAsString()).hasSizeGreaterThan(0);
+                    .andExpect(jsonPath("$.token").isNotEmpty());
         }
     }
 
@@ -96,6 +93,13 @@ class AuthenticationServiceApplicationTests {
                             .content(getCredentialsJSONString("Darrel Neville", "wrong password")))
                     .andExpect(status().isUnauthorized());
         }
+    }
+
+    @Test
+    void publicKeyIsHosted() throws Exception {
+        mockMvc.perform(get(URL_BASE + "/public"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.key").isNotEmpty());
     }
 
     private static String getUserJSONString(String username, String email, String password, String role, Boolean enabled) {
