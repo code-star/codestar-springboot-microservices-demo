@@ -1,24 +1,32 @@
 package com.ordina.authenticationservice.user;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
-@MappedSuperclass
+@Getter
+@Setter
+@ToString
 @SuperBuilder
-@RequiredArgsConstructor
+@MappedSuperclass
+@NoArgsConstructor
 public class UserCredentials {
 
     @Column(nullable = false, unique = true)
-    @Getter
-    @Setter
     protected String username;
 
     @Column(nullable = false)
-    @Getter @Setter
     protected String password;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof UserCredentials other)) return false;
+
+        if (!username.equals(other.username)) return false;
+        return password.equals(other.password);
+    }
 }
+
