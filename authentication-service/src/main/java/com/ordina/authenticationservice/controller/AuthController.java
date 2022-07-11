@@ -24,9 +24,6 @@ public class AuthController {
         User user = userRepository.findByUsername(credentials.getUsername())
                 .orElseThrow(UserNotFoundException::new);
 
-        log.info(user.toString());
-        log.info(credentials.toString());
-
         if (!credentials.equals(user))
             throw new InvalidPasswordException();
 
