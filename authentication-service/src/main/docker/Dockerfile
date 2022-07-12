@@ -4,6 +4,11 @@ ADD maven/${project.build.finalName}.jar ./
 RUN java -Djarmode=layertools -jar ${project.build.finalName}.jar extract
 
 FROM openjdk:18-slim
+LABEL PROJECT_NAME=${project.artifactId} \
+      PROJECT=${project.id}
+
+EXPOSE 8081
+
 WORKDIR application
 COPY --from=builder application/dependencies/ ./
 COPY --from=builder application/spring-boot-loader/ ./
