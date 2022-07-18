@@ -7,7 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 @Getter
-@ToString
 @SuperBuilder
 @MappedSuperclass
 @NoArgsConstructor

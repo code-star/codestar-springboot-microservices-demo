@@ -15,7 +15,7 @@ public class UserLoader implements CommandLineRunner {
     private final UserRepository userRepository;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         loadUserObjects();
     }
 

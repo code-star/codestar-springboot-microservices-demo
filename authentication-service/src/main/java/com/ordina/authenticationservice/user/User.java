@@ -7,7 +7,6 @@ import javax.persistence.*;
 
 @Entity
 @Getter
-@ToString(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
 @Table(name = "users")
@@ -23,14 +22,4 @@ public class User extends UserCredentials {
 
     @Column(nullable = false)
     private Boolean enabled;
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof User other)) return false;
-
-        if (!username.equals(other.username)) return false;
-        if (!password.equals(other.password)) return false;
-        return super.equals(other);
-    }
 }
