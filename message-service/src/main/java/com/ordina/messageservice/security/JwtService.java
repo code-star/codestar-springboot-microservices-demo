@@ -1,41 +1,52 @@
 package com.ordina.messageservice.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import lombok.RequiredArgsConstructor;
+import com.ordina.jwtauthlib.Jwt;
+import com.ordina.messageservice.config.ServiceConfiguration;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import javax.annotation.PostConstruct;
+import java.security.PublicKey;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class JwtService {
 
-    private final JwtKeyProvider jwtKeyProvider;
+    @Autowired
+    private ServiceConfiguration config;
 
-    boolean validateToken(String jwt) {
-        try {
-            Jwts.parserBuilder()
-                    .setSigningKey(jwtKeyProvider.getPublicKey())
-                    .build()
-                    .parseClaimsJws(jwt);
-            return true;
-        } catch(JwtException e) {
-            log.warn("Invalid JWT!", e);
+    @Getter
+    private PublicKey publicKey;
+
+    @PostConstruct
+    public void init() {
+        publicKey = this.retrievePublicKey();
+    }
+
+    public PublicKey retrievePublicKey() {
+        log.info("Retrieving public key from webserver...");
+        WebClient webClient = getWebClient();
+        PubKeyResponse response = webClient.get()
+                .retrieve()
+                .bodyToMono(PubKeyResponse.class)
+                .doOnError(err -> { throw new RuntimeException(err); })
+                .block();
+
+        if (response == null) {
+            throw new RuntimeException("Empty response");
         }
-        return false;
+
+        return Jwt.publicKeyFromBytes(response.key());
     }
 
-    public Long getUserIdFrom(String jwt) {
-        return getClaims(jwt).get("user_id", Long.class);
+    private WebClient getWebClient() {
+        return WebClient.builder()
+                .baseUrl(config.getAuthServiceUrl())
+                .build();
     }
 
-    private Claims getClaims(String jwt) {
-        return Jwts.parserBuilder()
-                .setSigningKey(jwtKeyProvider.getPublicKey())
-                .build()
-                .parseClaimsJws(jwt)
-                .getBody();
-    }
+    public record PubKeyResponse(byte[] key) { }
 }

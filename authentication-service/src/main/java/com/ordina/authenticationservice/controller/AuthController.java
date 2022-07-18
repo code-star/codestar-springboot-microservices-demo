@@ -8,6 +8,7 @@ import com.ordina.authenticationservice.security.PubKeyResponse;
 import com.ordina.authenticationservice.user.User;
 import com.ordina.authenticationservice.user.UserCredentials;
 import com.ordina.authenticationservice.user.UserRepository;
+import com.ordina.jwtauthlib.Jwt;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,9 +34,12 @@ public class AuthController {
         if (!credentials.equals(user))
             throw new InvalidPasswordException();
 
-        final String jwtToken = jwtService.generateToken(user.getId());
+        String token = Jwt.generator()
+                .withKey(jwtService.getPrivateKey())
+                .withUserId(user.getId())
+                .witExpiration(JwtService.TOKEN_EXPIRATION_MINUTES);
 
-        return new ResponseEntity<>(new JwtResponse(jwtToken), HttpStatus.OK);
+        return new ResponseEntity<>(new JwtResponse(token), HttpStatus.OK);
     }
 
     @PostMapping("/register")
@@ -46,7 +50,7 @@ public class AuthController {
 
     @GetMapping("/public")
     public ResponseEntity<PubKeyResponse> getPublicKey() {
-        byte[] encodedKey = jwtService.getKeyProvider().getKeyPair().getPublic().getEncoded();
+        byte[] encodedKey = jwtService.getPublicKey().getEncoded();
         return new ResponseEntity<>(new PubKeyResponse(encodedKey), HttpStatus.OK);
     }
 }

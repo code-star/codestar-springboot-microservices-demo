@@ -4,6 +4,7 @@ import com.ordina.messageservice.message.Message;
 import com.ordina.messageservice.message.MessageRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class MessageController {
     private MessageRepository messageRepository;
 
     @PostMapping
+    @PreAuthorize("#message.userId == authentication.principal.id")
     public Message uploadMessage(@RequestBody Message message) {
         return messageRepository.save(message);
     }

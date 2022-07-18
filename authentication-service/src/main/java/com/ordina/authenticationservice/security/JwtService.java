@@ -1,37 +1,31 @@
 package com.ordina.authenticationservice.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.Getter;
+import com.ordina.jwtauthlib.Jwt;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 @Slf4j
 @Service
 public class JwtService {
 
-    private static final long TOKEN_EXPIRATION_MINUTES = 10;
+    public static final int TOKEN_EXPIRATION_MINUTES = 10;
 
-    @Getter
-    @Autowired
-    private JwtKeyProvider keyProvider;
+    private final KeyPair keyPair;
 
-    public String generateToken(Long userId) {
-        LocalDateTime expiryDate = LocalDateTime
-                .now()
-                .plusMinutes(TOKEN_EXPIRATION_MINUTES);
-
-        return Jwts.builder()
-                .setExpiration(Date.from(expiryDate.atZone(ZoneId.systemDefault()).toInstant()))
-                .signWith(keyProvider.getKeyPair().getPrivate(), SignatureAlgorithm.RS256)
-                .claim("user_id", userId)
-                .compact();
+    public JwtService() {
+        keyPair = Jwt.generateKeyPair();
     }
+
+    public PublicKey getPublicKey() {
+        return keyPair.getPublic();
+    }
+
+    public PrivateKey getPrivateKey() {
+        return keyPair.getPrivate();
+    }
+
 }
