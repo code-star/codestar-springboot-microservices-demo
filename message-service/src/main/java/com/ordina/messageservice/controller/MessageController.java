@@ -1,6 +1,7 @@
 package com.ordina.messageservice.controller;
 
 import com.ordina.messageservice.message.Message;
+import com.ordina.messageservice.message.MessageDto;
 import com.ordina.messageservice.message.MessageRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +19,14 @@ public class MessageController {
     private MessageRepository messageRepository;
 
     @PostMapping
-    @PreAuthorize("#message.userId == authentication.principal.id")
-    public Message uploadMessage(@RequestBody Message message) {
-        return messageRepository.save(message);
+    @PreAuthorize("#messageDto.userId == authentication.principal.id")
+    public MessageDto uploadMessage(@RequestBody MessageDto messageDto) {
+        messageRepository.save(new Message(messageDto));
+        return messageDto;
     }
 
     @GetMapping("/{userId}")
-    public List<Message> getMessagesByUser(@PathVariable("userId") Long userId) {
-        return messageRepository.findAllByUserId(userId);
+    public List<MessageDto> getMessagesByUser(@PathVariable("userId") Long userId) {
+        return messageRepository.findAllDtoByUserId(userId);
     }
 }

@@ -7,13 +7,17 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
 
-@Getter
 @Entity
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
 @Table(name = "messages")
 public class Message {
+
+    protected Message() {}
+
+    public Message(MessageDto messageDto) {
+        this.userId = messageDto.getUserId();
+        this.content = messageDto.getContent();
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

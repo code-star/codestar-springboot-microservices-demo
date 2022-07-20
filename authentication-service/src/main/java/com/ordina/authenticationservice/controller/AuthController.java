@@ -1,5 +1,6 @@
 package com.ordina.authenticationservice.controller;
 
+import com.ordina.authenticationservice.exception.UserAlreadyExistsException;
 import com.ordina.authenticationservice.exception.UserNotFoundException;
 import com.ordina.authenticationservice.exception.InvalidPasswordException;
 import com.ordina.authenticationservice.security.JwtResponse;
@@ -7,6 +8,7 @@ import com.ordina.authenticationservice.security.JwtService;
 import com.ordina.authenticationservice.security.PubKeyResponse;
 import com.ordina.authenticationservice.user.User;
 import com.ordina.authenticationservice.user.UserCredentials;
+import com.ordina.authenticationservice.user.UserDto;
 import com.ordina.authenticationservice.user.UserRepository;
 import com.ordina.jwtauthlib.Jwt;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +30,15 @@ public class AuthController {
 
     @PostMapping
     public ResponseEntity<JwtResponse> authenticate(@RequestBody UserCredentials credentials) {
-        User user = userRepository.findByUsername(credentials.getUsername())
+        UserDto user = userRepository.findUserDtoByUsername(credentials.getUsername())
                 .orElseThrow(UserNotFoundException::new);
 
-        if (!credentials.equals(user))
+        log.info("Authenticating user: " + user);
+
+        if (!user.hasPassword(credentials.getPassword()))
             throw new InvalidPasswordException();
+
+        log.info("User with id " + user.getId() + " has authenticated succesfully.");
 
         String token = Jwt.generator()
                 .withKey(jwtService.getPrivateKey())
@@ -44,8 +50,15 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public User register(@RequestBody User user) {
-        return userRepository.save(user);
+    public UserDto register(@RequestBody UserDto userDto) {
+        userRepository.findUserDtoByUsername(userDto.getUsername())
+                .ifPresent(dto -> {throw new UserAlreadyExistsException();});
+
+        userRepository.findUserDtoByEmail(userDto.getEmail())
+                .ifPresent(dto -> {throw new UserAlreadyExistsException();});
+
+        userRepository.save(new User(userDto));
+        return userDto;
     }
 
     @GetMapping("/public")
