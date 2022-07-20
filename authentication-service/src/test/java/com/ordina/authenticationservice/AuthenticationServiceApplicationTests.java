@@ -1,6 +1,7 @@
 package com.ordina.authenticationservice;
 
 import com.ordina.authenticationservice.controller.AuthController;
+import com.ordina.authenticationservice.security.PasswordHasher;
 import com.ordina.authenticationservice.user.User;
 import com.ordina.authenticationservice.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,8 @@ class AuthenticationServiceApplicationTests {
     private MockMvc mockMvc;
 
     private static final String URL_BASE = "/api/v1/auth";
+    private static final String URL_REGISTER = URL_BASE + "/register";
+    private static final String URL_PUBLIC_KEY = URL_BASE + "/public";
 
     @Nested
     class PreloadAndAuthenticate {
@@ -46,7 +49,8 @@ class AuthenticationServiceApplicationTests {
             Optional<User> rhiannan = userRepository.findByUsername("Rhiannan Foreman");
 
             assertThat(rhiannan).isPresent();
-            assertThat(rhiannan.get().getPassword()).isEqualTo("p4ssw0rd");
+            assertThat(PasswordHasher.areEqual("p4ssw0rd", rhiannan.get().getPassword())).isTrue();
+            assertThat(PasswordHasher.areEqual("p4ssw1rd", rhiannan.get().getPassword())).isFalse();
             assertThat(rhiannan.get().getEmail()).isEqualTo("rhiannan.foreman@gmail.com");
             assertThat(rhiannan.get().getEnabled()).isTrue();
         }
@@ -65,32 +69,56 @@ class AuthenticationServiceApplicationTests {
         @Test
         @Order(1)
         void registerUser() throws Exception {
-            mockMvc.perform(post(URL_BASE + "/register").contentType(MediaType.APPLICATION_JSON)
+            mockMvc.perform(post(URL_REGISTER).contentType(MediaType.APPLICATION_JSON)
                             .content(getUserJSONString("Foo-Bar", "foo.bar@ordina.nl", "p4ssw0rd", "admin", true)))
                     .andExpect(status().isCreated());
         }
 
         @Test
         @Order(2)
+        void registerExistingUsername_ShouldReturnBadRequest() throws Exception {
+            mockMvc.perform(post(URL_REGISTER).contentType(MediaType.APPLICATION_JSON)
+                            .content(getUserJSONString("Foo-Bar", "not-existing@ordina.nl", "p4ssw0rd", "admin", true)))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @Order(2)
+        void registerExistingEmail_ShouldReturnBadRequest() throws Exception {
+            mockMvc.perform(post(URL_REGISTER).contentType(MediaType.APPLICATION_JSON)
+                            .content(getUserJSONString("Not existing", "foo.bar@ordina.nl", "p4ssw0rd", "admin", true)))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @Order(2)
         void authenticateUser() throws Exception {
             mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
-                    .content(getCredentialsJSONString("Foo-Bar", "p4ssw0rd")))
+                            .content(getCredentialsJSONString("Foo-Bar", "p4ssw0rd")))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.token").isNotEmpty());
         }
     }
 
     @Nested
-    class InvalidCredentials {
+    class AuthenticateWith {
         @Test
-        void invalidUsernameReturnsNotFoundError() throws Exception {
+        void validUsername_ReturnsOk_AndToken() throws Exception {
             mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
-                    .content(getCredentialsJSONString("Non-existing User", "123")))
+                            .content(getCredentialsJSONString("Audrey Chan", "welcome01")))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.token").isNotEmpty());
+        }
+
+        @Test
+        void invalidUsername_ReturnsNotFoundError() throws Exception {
+            mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
+                            .content(getCredentialsJSONString("Non-existing User", "123")))
                     .andExpect(status().isNotFound());
         }
 
         @Test
-        void invalidPasswordReturnsUnauthorized() throws Exception {
+        void invalidPassword_ReturnsUnauthorized() throws Exception {
             mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
                             .content(getCredentialsJSONString("Darrel Neville", "wrong password")))
                     .andExpect(status().isUnauthorized());
@@ -99,7 +127,7 @@ class AuthenticationServiceApplicationTests {
 
     @Test
     void publicKeyIsHosted() throws Exception {
-        mockMvc.perform(get(URL_BASE + "/public"))
+        mockMvc.perform(get(URL_PUBLIC_KEY))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.key").isNotEmpty());
     }

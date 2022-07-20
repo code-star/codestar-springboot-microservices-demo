@@ -2,6 +2,7 @@ package com.ordina.messageservice;
 
 import com.ordina.jwtauthlib.Jwt;
 import com.ordina.messageservice.message.Message;
+import com.ordina.messageservice.message.MessageDto;
 import com.ordina.messageservice.message.MessageRepository;
 import com.ordina.messageservice.security.JwtService;
 import lombok.extern.slf4j.Slf4j;
@@ -71,16 +72,17 @@ class MessageServiceApplicationTests {
         void isDatabasePreloaded() {
             long count = messageRepository.count();
 
-            Message message = Message.builder()
+            Message message = new Message(MessageDto.builder()
                     .userId(1L)
                     .content("message content")
-                    .build();
+                    .build());
+
             messageRepository.save(message);
 
             assertThat(count).isEqualTo(messageRepository.count() - 1);
 
             assertThat(messageRepository.findById(message.getId())).isPresent();
-            assertThat(messageRepository.findById(message.getId()).get()).isEqualTo(message);
+            assertThat(messageRepository.findById(message.getId())).get().isEqualTo(message);
         }
     }
 
