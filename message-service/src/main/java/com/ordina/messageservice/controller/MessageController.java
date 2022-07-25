@@ -1,37 +1,48 @@
 package com.ordina.messageservice.controller;
 
-import com.ordina.messageservice.message.Message;
-import com.ordina.messageservice.message.MessageDto;
-import com.ordina.messageservice.message.MessageRepository;
+import com.ordina.jwtauthlib.MyUserDetails;
+import com.ordina.messageservice.controller.dto.MessageRequest;
+import com.ordina.messageservice.controller.dto.MessageResponse;
+import com.ordina.messageservice.controller.dto.MessageDto;
+import com.ordina.messageservice.model.MessageDtoRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @Slf4j
+@CrossOrigin
 @RestController
 @RequestMapping("/api/v1/messages")
 public class MessageController {
 
-    @Autowired
-    private MessageRepository messageRepository;
+    private final MessageDtoRepository messageRepository;
+
+    public MessageController(MessageDtoRepository messageRepository) {
+        this.messageRepository = messageRepository;
+    }
 
     @PostMapping
-    @PreAuthorize("#messageDto.userId == authentication.principal.id")
-    public MessageDto uploadMessage(@RequestBody MessageDto messageDto) {
-        messageRepository.save(new Message(messageDto));
-        return messageDto;
+    @PreAuthorize("authentication.principal.id != null")
+    public MessageResponse uploadMessage(@RequestBody MessageRequest messageRequest) {
+        MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        MessageDto messageDto = messageRepository.save(messageRequest, userDetails.getId());
+        return messageDto.toMessageResponse();
     }
 
     @GetMapping("/{userId}")
-    public List<MessageDto> getMessagesByUser(@PathVariable("userId") Long userId) {
-        return messageRepository.findAllDtoByUserId(userId);
+    public List<MessageResponse> getMessagesByUser(@PathVariable("userId") Long userId) {
+        return messageRepository.findAllByUserId(userId).stream()
+                .map(MessageDto::toMessageResponse)
+                .toList();
     }
 
     @GetMapping("/all")
-    public List<MessageDto> getMessagesByUser() {
-        return messageRepository.findAllDto();
+    public List<MessageResponse> getMessagesByUser() {
+        return messageRepository.findAll().stream()
+                .map(MessageDto::toMessageResponse)
+                .toList();
     }
 }

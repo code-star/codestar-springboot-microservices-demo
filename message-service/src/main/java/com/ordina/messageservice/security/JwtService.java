@@ -4,42 +4,42 @@ import com.ordina.jwtauthlib.Jwt;
 import com.ordina.messageservice.config.ServiceConfiguration;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import javax.annotation.PostConstruct;
 import java.security.PublicKey;
 
 @Component
 @Slf4j
 public class JwtService {
 
-    @Autowired
-    private ServiceConfiguration config;
+    private final ServiceConfiguration config;
 
     @Getter
-    private PublicKey publicKey;
+    private final PublicKey publicKey;
 
-    @PostConstruct
-    public void init() {
+    public JwtService(ServiceConfiguration config) {
+        this.config = config;
         publicKey = this.retrievePublicKey();
     }
 
     public PublicKey retrievePublicKey() {
         log.info("Retrieving public key from webserver...");
-        WebClient webClient = getWebClient();
-        PubKeyResponse response = webClient.get()
+        PubKeyResponse response = getPubKeyResponse();
+
+        if (response == null) {
+            throw new RuntimeException("Empty response from authentication server, is it up?");
+        }
+
+        return Jwt.publicKeyFromBytes(response.key());
+    }
+
+    private PubKeyResponse getPubKeyResponse() {
+        return getWebClient().get()
                 .retrieve()
                 .bodyToMono(PubKeyResponse.class)
                 .doOnError(err -> { throw new RuntimeException(err); })
                 .block();
-
-        if (response == null) {
-            throw new RuntimeException("Empty response");
-        }
-
-        return Jwt.publicKeyFromBytes(response.key());
     }
 
     private WebClient getWebClient() {

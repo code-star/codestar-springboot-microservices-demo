@@ -1,9 +1,8 @@
 package com.ordina.messageservice;
 
 import com.ordina.jwtauthlib.Jwt;
-import com.ordina.messageservice.message.Message;
-import com.ordina.messageservice.message.MessageDto;
-import com.ordina.messageservice.message.MessageRepository;
+import com.ordina.messageservice.controller.dto.MessageDto;
+import com.ordina.messageservice.model.MessageDtoRepository;
 import com.ordina.messageservice.security.JwtService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -31,7 +29,6 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(OrderAnnotation.class)
-@ComponentScan(value = { "com.ordina.messageservice", "com.ordina.jwtauthlib" }, lazyInit = true)
 class MessageServiceApplicationTests {
 
     static final KeyPair keyPair = Jwt.generateKeyPair();
@@ -47,7 +44,7 @@ class MessageServiceApplicationTests {
     private MockMvc mockMvc;
 
     @Autowired
-    private MessageRepository messageRepository;
+    private MessageDtoRepository messageRepository;
 
     @BeforeEach
     void setup() {
@@ -72,10 +69,10 @@ class MessageServiceApplicationTests {
         void isDatabasePreloaded() {
             long count = messageRepository.count();
 
-            Message message = new Message(MessageDto.builder()
+            MessageDto message = MessageDto.builder()
                     .userId(1L)
                     .content("message content")
-                    .build());
+                    .build();
 
             messageRepository.save(message);
 
@@ -89,11 +86,12 @@ class MessageServiceApplicationTests {
     @Nested
     @Order(2)
     class UploadMessage {
+
         @Test
         void withValidUserId_ShouldReturnOk() throws Exception {
             mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
                             .header("authorization", "Bearer " + token_valid_user_1)
-                            .content(getMessageJSONString(1, "Dit is een test berichtje van een valid user.")))
+                            .content(createMessageJSONString(1, "Dit is een test berichtje van een valid user.")))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON));
         }
@@ -102,7 +100,7 @@ class MessageServiceApplicationTests {
         void withInvalidUserId_ShouldReturnForbidden() throws Exception {
             mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
                             .header("authorization", "Bearer " + token_valid_user_1)
-                            .content(getMessageJSONString(10, "Dit is een test berichtje van een valid user gepost onder verkeerde user.")))
+                            .content(createMessageJSONString(10, "Dit is een test berichtje van een valid user gepost onder verkeerde user.")))
                     .andExpect(status().isForbidden());
         }
 
@@ -110,7 +108,7 @@ class MessageServiceApplicationTests {
         void withExpiredToken_ShouldReturnUnauthorized() throws Exception {
             mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
                             .header("authorization", "Bearer " + token_expired_user_1)
-                            .content(getMessageJSONString(1, "Dit is een test berichtje van een expired user.")))
+                            .content(createMessageJSONString(1, "Dit is een test berichtje van een expired user.")))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -118,19 +116,19 @@ class MessageServiceApplicationTests {
         void withInvalidUser_ShouldReturnForbidden() throws Exception {
             mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
                             .header("authorization", "Bearer " + token_invalid_user)
-                            .content(getMessageJSONString(1, "Dit is een test berichtje van een invalid user.")))
+                            .content(createMessageJSONString(1, "Dit is een test berichtje van een invalid user.")))
                     .andExpect(status().isForbidden());
         }
 
         @Test
         void withOutAuthorization_ShouldReturnUnauthorized() throws Exception {
             mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
-                            .content(getMessageJSONString(1, "Dit is een test berichtje van een unauthorized user.")))
+                            .content(createMessageJSONString(1, "Dit is een test berichtje van een unauthorized user.")))
                     .andExpect(status().isUnauthorized());
         }
     }
 
-    private static String getMessageJSONString(int userId, String content) {
+    private static String createMessageJSONString(int userId, String content) {
         return "{\"userId\": \"" + userId + "\",\"content\": \"" + content + "\"}";
     }
 }
