@@ -10,6 +10,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { LoginComponent } from './login/login.component';
 import { FeedComponent } from './feed/feed.component';
 import { StatusComponent } from './status/status.component';
+import { MessageComponent } from './message/message.component';
 
 const appRoutes: Routes = [
   {
@@ -38,7 +39,8 @@ const appRoutes: Routes = [
     NotFoundComponent,
     LoginComponent,
     FeedComponent,
-    StatusComponent
+    StatusComponent,
+    MessageComponent
   ],
   imports: [
     BrowserModule,

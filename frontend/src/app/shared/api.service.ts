@@ -9,15 +9,17 @@ import {Message} from "../feed/model/message";
   providedIn: 'root'
 })
 export class ApiService {
-  private PORT = 8081
+  private AUTH_PORT = 8081
+  private MESSAGES_PORT = 8082
   private HOST = "http://localhost"
   private API_BASE = "/api"
   private API_VERSION = "/v1"
-  private URL_BASE = this.HOST + ":" + this.PORT + this.API_BASE + this.API_VERSION
+  private AUTH_URL_BASE = this.HOST + ":" + this.AUTH_PORT + this.API_BASE + this.API_VERSION
+  private MESSAGE_URL_BASE = this.HOST + ":" + this.MESSAGES_PORT + this.API_BASE + this.API_VERSION
 
-  private AUTH_BASE = this.URL_BASE + "/auth"
-  private MESSAGE_BASE = this.URL_BASE + "/messages"
-  private MESSAGE_GET_ALL_URL = this.URL_BASE + "/messages/all"
+  private AUTHORIZE_URL = this.AUTH_URL_BASE + "/auth"
+  private MESSAGE_POST_URL = this.MESSAGE_URL_BASE + "/messages"
+  private MESSAGE_GET_ALL_URL = this.MESSAGE_URL_BASE + "/messages/all"
 
 
   constructor(private httpClient: HttpClient) {
@@ -25,7 +27,7 @@ export class ApiService {
   }
 
   getAccessToken(credentials: UserCredentials) : Observable<TokenResponse> {
-    return this.httpClient.post<TokenResponse>(this.AUTH_BASE, credentials);
+    return this.httpClient.post<TokenResponse>(this.AUTHORIZE_URL, credentials);
   }
 
   getAllMessages() : Observable<Message[]> {
@@ -33,7 +35,7 @@ export class ApiService {
   }
 
   postMessage(message: Message, accessToken: string) : Observable<Message> {
-    return this.httpClient.post<Message>(this.MESSAGE_BASE, message, ApiService.getAuthorizationRequestOptions(accessToken));
+    return this.httpClient.post<Message>(this.MESSAGE_POST_URL, message, ApiService.getAuthorizationRequestOptions(accessToken));
   }
 
   private static getAuthorizationHeader(token: string) : object {
