@@ -1,0 +1,23 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8">
+    <form (submit)="onSubmit()" class="mt-3">
+      <div class="mb-3">
+        <label for="inputUsername" class="form-label">Username</label>
+        <input type="text"
+               class="form-control"
+               id="inputUsername"
+               name="username"
+               [(ngModel)]="userCredentials.username">
+      </div>
+      <div class="mb-3">
+        <label for="inputPassword" class="form-label">Password</label>
+        <input type="password"
+               class="form-control"
+               id="inputPassword"
+               name="password"
+               [(ngModel)]="userCredentials.password">
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+</div>
