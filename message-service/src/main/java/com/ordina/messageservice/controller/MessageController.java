@@ -29,4 +29,9 @@ public class MessageController {
     public List<MessageDto> getMessagesByUser(@PathVariable("userId") Long userId) {
         return messageRepository.findAllDtoByUserId(userId);
     }
+
+    @GetMapping("/all")
+    public List<MessageDto> getMessagesByUser() {
+        return messageRepository.findAllDto();
+    }
 }
