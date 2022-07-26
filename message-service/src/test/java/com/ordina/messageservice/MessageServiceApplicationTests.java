@@ -51,13 +51,23 @@ class MessageServiceApplicationTests {
         Mockito.when(jwtService.getPublicKey()).thenReturn(keyPair.getPublic());
     }
 
-    @Test
-    void getMessages() throws Exception {
-        mockMvc.perform(get(URL_BASE + "/1")
-                        .header("authorization", "Bearer " + token_valid_user_1))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
+    @Nested
+    class GetMessages {
+        @Test
+        void getMessagesFromUser1_ShouldReturnOk() throws Exception {
+            mockMvc.perform(get(URL_BASE + "/1"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andReturn();
+        }
+
+        @Test
+        void getAllMessages_ShouldReturnOk() throws Exception {
+            mockMvc.perform(get(URL_BASE + "/all"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andReturn();
+        }
     }
 
     @Test
