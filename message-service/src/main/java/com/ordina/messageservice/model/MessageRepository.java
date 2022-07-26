@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-interface MessageRepository extends CrudRepository<Message, Long> {
+interface MessageRepository extends CrudRepository<Message, UUID> {
 
     Optional<Message> findById(UUID id);
 

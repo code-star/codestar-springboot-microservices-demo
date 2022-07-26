@@ -2,6 +2,7 @@ package com.ordina.messageservice.model;
 
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -19,6 +20,7 @@ public class Message {
     @Id
     @GeneratedValue
     @Column(nullable = false, updatable = false)
+    @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID id;
 
     @Column(nullable = false, updatable = false)
