@@ -1,10 +1,12 @@
 package com.ordina.authenticationservice.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.security.SecureRandom;
 
-public abstract class PasswordHasher {
+@Slf4j
+public class PasswordHasher {
 
     private PasswordHasher() {}
 
@@ -13,7 +15,10 @@ public abstract class PasswordHasher {
             new BCryptPasswordEncoder(STRENGTH, new SecureRandom());
 
     public static String hash(String password) {
-        return bCryptPasswordEncoder.encode(password);
+        String hashed = bCryptPasswordEncoder.encode(password);
+        log.info("Hashing password: " + password);
+        log.info("Password becomes: " + hashed);
+        return hashed;
     }
 
     public static boolean areEqual(String plainPassword, String hashedPassword) {

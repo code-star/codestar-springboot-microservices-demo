@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 
 import java.security.PrivateKey;
 import java.util.Date;
+import java.util.UUID;
 
 public class JwtGenerator {
 
@@ -12,15 +13,12 @@ public class JwtGenerator {
     }
 
     public interface NeedUserId {
-        NeedExpiration withUserId(Long id);
-        default NeedExpiration withUserId(Integer id) {
-            return withUserId(Long.valueOf(id));
-        }
+        NeedExpiration withUserId(UUID id);
     }
 
     public interface NeedExpiration {
         String withExpiration(Date expiration);
-        default String witExpiration(int minutes) {
+        default String witExpirationInMinutes(int minutes) {
             return withExpiration(Jwt.dateFromNowInMinutes(minutes));
         }
     }
@@ -32,7 +30,7 @@ public class JwtGenerator {
             -> Jwts.builder()
                 .setExpiration(expiration)
                 .signWith(key)
-                .claim("user_id", userId)
+                .claim("user_id", userId.toString())
                 .setIssuer("codestar")
                 .claim("validation", "codestar")
                 .compact();

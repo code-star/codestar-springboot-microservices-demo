@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 import java.security.KeyPair;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -32,19 +33,45 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 class MessageServiceApplicationTests {
 
     static final KeyPair keyPair = Jwt.generateKeyPair();
-    private static final String URL_BASE = "/api/v1/messages";
-    static final String token_valid_user_1 = Jwt.generator().withKey(keyPair.getPrivate()).withUserId(1).witExpiration(10);
-    static final String token_expired_user_1 = Jwt.generator().withKey(keyPair.getPrivate()).withUserId(1).witExpiration(-10);
-    static final String token_invalid_user = Jwt.generator().withKey(keyPair.getPrivate()).withUserId(-1).witExpiration(10);
+    static final String URL_BASE = "/api/v1/messages";
+
+    static String tokenValidUser;
+    static String tokenExpiredUser;
+    static String tokenInvalidUser;
+
+    static UUID validMessageId;
 
     @MockBean
-    private JwtService jwtService;
+    JwtService jwtService;
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
     @Autowired
-    private MessageDtoRepository messageRepository;
+    MessageDtoRepository messageRepository;
+
+    @BeforeAll
+    void createAllTokens() {
+        MessageDto messageDto = messageRepository.findAll().get(0);
+        UUID validId = messageDto.getUserId();
+        UUID invalidId = UUID.randomUUID();
+        validMessageId = messageDto.getId();
+
+        tokenValidUser = Jwt.generator()
+                .withKey(keyPair.getPrivate())
+                .withUserId(validId)
+                .witExpirationInMinutes(10);
+
+        tokenExpiredUser = Jwt.generator()
+                .withKey(keyPair.getPrivate())
+                .withUserId(validId)
+                .witExpirationInMinutes(-10);
+
+        tokenInvalidUser = Jwt.generator()
+                .withKey(keyPair.getPrivate())
+                .withUserId(invalidId)
+                .witExpirationInMinutes(10);
+    }
 
     @BeforeEach
     void setup() {
@@ -54,34 +81,71 @@ class MessageServiceApplicationTests {
     @Nested
     class GetMessages {
         @Test
-        void getMessagesFromUser1_ShouldReturnOk() throws Exception {
-            mockMvc.perform(get(URL_BASE + "/1"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andReturn();
-        }
-
-        @Test
         void getAllMessages_ShouldReturnOk() throws Exception {
             mockMvc.perform(get(URL_BASE + "/all"))
                     .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andReturn();
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        }
+
+        @Test
+        void getMessage_ShouldReturnOk() throws Exception {
+            mockMvc.perform(get(URL_BASE + "/" + validMessageId.toString()))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
         }
     }
 
-    @Test
-    void isDatabasePreloaded() {
-        long count = messageRepository.count();
-        MessageDto message = MessageDto.builder()
-                .userId(1L)
-                .content("message content")
-                .build();
-        message = messageRepository.save(message);
+    @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    class insertingAndRetrieveMessage {
+        MessageDto message;
+        UUID userId = UUID.randomUUID();
+        UUID messageId = UUID.randomUUID();
 
-        assertThat(count).isEqualTo(messageRepository.count() - 1);
-        assertThat(messageRepository.findAllByUserId(message.getUserId())).contains(message);
-        assertThat(messageRepository.findById(message.getUuid())).get().isEqualTo(message);
+        @BeforeAll
+        void insertMessage() {
+            message = MessageDto.builder()
+                    .id(messageId)
+                    .userId(userId)
+                    .content("message content")
+                    .build();
+            messageRepository.save(message);
+        }
+
+        @Test
+        void messageCount_ShouldBeLargerThanZero() {
+            assertThat(messageRepository.count()).isPositive();
+        }
+
+        @Test
+        void findByUserId_ShouldEqualMessage() {
+            assertThat(messageRepository.findAllByUserId(message.getUserId())).contains(message);
+        }
+
+        @Test
+        void findByMessageId_ShouldEqualMessage() {
+            assertThat(messageRepository.findById(message.getId())).get().isEqualTo(message);
+        }
+
+        @Test
+        void isUnequalToOtherMessage() {
+            assertThat(message)
+                    .isNotEqualTo(MessageDto.builder()
+                            .id(UUID.randomUUID())
+                            .userId(message.getUserId())
+                            .content(message.getContent())
+                            .build())
+                    .isNotEqualTo(MessageDto.builder()
+                            .id(message.getId())
+                            .userId(UUID.randomUUID())
+                            .content(message.getContent())
+                            .build())
+                    .isNotEqualTo(MessageDto.builder()
+                            .id(message.getId())
+                            .userId(message.getUserId())
+                            .content("different content")
+                            .build());
+        }
     }
 
     @Nested
@@ -89,7 +153,7 @@ class MessageServiceApplicationTests {
         @Test
         void withValidUserId_ShouldReturnOk() throws Exception {
             mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
-                            .header("authorization", "Bearer " + token_valid_user_1)
+                            .header("authorization", "Bearer " + tokenValidUser)
                             .content(createMessageJSONString("Dit is een test berichtje van een valid user.")))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -98,7 +162,7 @@ class MessageServiceApplicationTests {
         @Test
         void withExpiredToken_ShouldReturnForbidden() throws Exception {
             mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
-                            .header("authorization", "Bearer " + token_expired_user_1)
+                            .header("authorization", "Bearer " + tokenExpiredUser)
                             .content(createMessageJSONString("Dit is een test berichtje van een expired user.")))
                     .andExpect(status().isForbidden());
         }

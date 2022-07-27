@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.security.KeyPair;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -11,7 +12,6 @@ import static org.assertj.core.api.Assertions.*;
 class JwtAuthLibApplicationTests {
 
     @Test
-    @Order(1)
     void generateKeyPair() {
         KeyPair keypair = Jwt.generateKeyPair();
 
@@ -27,23 +27,25 @@ class JwtAuthLibApplicationTests {
     }
 
     @Test
-    @Order(2)
     void generateAndValidateToken() {
         KeyPair keypair = Jwt.generateKeyPair();
 
+        UUID uuid = UUID.randomUUID();
         String token = Jwt.generator()
                 .withKey(keypair.getPrivate())
-                .withUserId(15)
+                .withUserId(uuid)
                 .withExpiration(Jwt.dateFromNowInMinutes(10));
 
-        assertThat(token).hasSize(460);
+        assertThat(token).hasSize(508);
 
         JwtDecodeResult result = Jwt.decoder()
                 .withToken(token)
                 .withKey(keypair.getPublic().getEncoded());
 
         assertThat(result.isValid()).isTrue();
-        assertThat(result.getUserId()).isEqualTo(15);
+        assertThat(result.getUserId()).isNotNull();
+        assertThat(result.getUserId()).isInstanceOf(UUID.class);
+        assertThat(result.getUserId()).isEqualTo(uuid);
 
         var decoderThatNeedsKey = Jwt.decoder().withToken(token);
         assertThatThrownBy(() ->
