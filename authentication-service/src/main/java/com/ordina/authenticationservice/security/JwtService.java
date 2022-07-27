@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -28,4 +29,10 @@ public class JwtService {
         return keyPair.getPrivate();
     }
 
+    public String getAccessTokenForUser(UUID userId) {
+        return Jwt.generator()
+                .withKey(getPrivateKey())
+                .withUserId(userId)
+                .witExpirationInMinutes(TOKEN_EXPIRATION_MINUTES);
+    }
 }

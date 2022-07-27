@@ -2,12 +2,14 @@ package com.ordina.messageservice.model;
 
 import com.ordina.messageservice.controller.dto.MessageDto;
 import com.ordina.messageservice.controller.dto.MessageRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Repository
 public class MessageDtoRepository {
     final MessageRepository repository;
@@ -20,7 +22,7 @@ public class MessageDtoRepository {
         return repository.findById(id).map(MessageDto::new);
     }
 
-    public List<MessageDto> findAllByUserId(Long userId) {
+    public List<MessageDto> findAllByUserId(UUID userId) {
         return repository.findAllByUserId(userId).stream()
                 .map(MessageDto::new)
                 .toList();
@@ -37,7 +39,7 @@ public class MessageDtoRepository {
         return new MessageDto(msg);
     }
 
-    public MessageDto save(MessageRequest messageRequest, Long userId) {
+    public MessageDto save(MessageRequest messageRequest, UUID userId) {
         return save(new MessageDto(messageRequest, userId));
     }
 

@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @CrossOrigin
@@ -33,7 +34,7 @@ public class MessageController {
     }
 
     @GetMapping("/{userId}")
-    public List<MessageResponse> getMessagesByUser(@PathVariable("userId") Long userId) {
+    public List<MessageResponse> getMessagesByUser(@PathVariable("userId") UUID userId) {
         return messageRepository.findAllByUserId(userId).stream()
                 .map(MessageDto::toMessageResponse)
                 .toList();

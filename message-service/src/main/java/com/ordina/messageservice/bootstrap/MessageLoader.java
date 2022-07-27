@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -26,18 +28,24 @@ public class MessageLoader implements CommandLineRunner {
         if (messageRepository.count() != 0)
             return;
 
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+
         messageRepository.save(MessageDto.builder()
-                .userId(1L)
+                .id(UUID.randomUUID())
+                .userId(id1)
                 .content("Hello World!")
                 .build());
 
         messageRepository.save(MessageDto.builder()
-                .userId(1L)
+                .id(UUID.randomUUID())
+                .userId(id1)
                 .content("Welcome to my channel! I can post messages that can be viewed by everyone!")
                 .build());
 
         messageRepository.save(MessageDto.builder()
-                .userId(2L)
+                .id(UUID.randomUUID())
+                .userId(id2)
                 .content("Eyoo, got this is sweeeeet!")
                 .build());
     }

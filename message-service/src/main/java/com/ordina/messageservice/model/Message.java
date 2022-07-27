@@ -10,7 +10,6 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "messages")
 @AllArgsConstructor
 public class Message {
@@ -18,13 +17,13 @@ public class Message {
     protected Message() {}
 
     @Id
-    @GeneratedValue
     @Column(nullable = false, updatable = false)
     @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID id;
 
     @Column(nullable = false, updatable = false)
-    private Long userId;
+    @Type(type = "org.hibernate.type.UUIDCharType")
+    private UUID userId;
 
     @Column(nullable = false)
     private String content;

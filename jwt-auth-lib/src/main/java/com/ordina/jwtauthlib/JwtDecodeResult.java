@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 
 import java.security.PublicKey;
+import java.util.UUID;
 
 public class JwtDecodeResult {
     private boolean valid = false;
@@ -35,8 +36,9 @@ public class JwtDecodeResult {
         return this.errorMessage;
     }
 
-    public Long getUserId() {
+    public UUID getUserId() {
         if (this.claims == null) return null;
-        return this.claims.get("user_id", Long.class);
+        String uuidStr = this.claims.get("user_id", String.class);
+        return UUID.fromString(uuidStr);
     }
 }

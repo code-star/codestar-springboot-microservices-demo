@@ -6,16 +6,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 public class MyUserDetails implements UserDetails {
 
-    private final Long userId;
+    private final UUID userId;
 
-    public MyUserDetails(Long userId) {
+    public MyUserDetails(UUID userId) {
         this.userId = userId;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return this.userId;
     }
 

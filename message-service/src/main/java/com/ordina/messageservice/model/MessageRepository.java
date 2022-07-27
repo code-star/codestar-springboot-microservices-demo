@@ -12,7 +12,7 @@ interface MessageRepository extends CrudRepository<Message, UUID> {
 
     Optional<Message> findById(UUID id);
 
-    List<Message> findAllByUserId(Long userId);
+    List<Message> findAllByUserId(UUID userId);
 
     List<Message> findAll();
 

@@ -20,13 +20,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService;
+
+    public JwtAuthenticationFilter(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -34,14 +38,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .withToken(getJwtFromRequest(request))
                 .withKey(jwtService.getPublicKey());
 
-        Long userId = getUserId(decodeResult);
+        UUID userId = getUserId(decodeResult);
         setAuthentication(request, userId);
 
         filterChain.doFilter(request, response);
     }
 
-    private Long getUserId(JwtDecodeResult decodeResult) {
-        Long userId;
+    private UUID getUserId(JwtDecodeResult decodeResult) {
+        UUID userId;
         if(decodeResult.isValid()) {
             userId = decodeResult.getUserId();
             log.info("User logged in with id: " + userId);
@@ -52,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return userId;
     }
 
-    private void setAuthentication(@NonNull HttpServletRequest request, @Nullable Long userId) {
+    private void setAuthentication(@NonNull HttpServletRequest request, @Nullable UUID userId) {
         MyUserDetails userDetails = new MyUserDetails(userId);
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                 new UsernamePasswordAuthenticationToken(userDetails , null, userDetails.getAuthorities());
