@@ -32,8 +32,6 @@ public class JwtGenerator {
                 .signWith(key)
                 .claim("user_id", userId.toString())
                 .setIssuer("codestar")
-                .claim("validation", "codestar")
                 .compact();
     }
-
 }

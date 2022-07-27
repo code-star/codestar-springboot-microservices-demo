@@ -36,7 +36,7 @@ class JwtAuthLibApplicationTests {
                 .withUserId(uuid)
                 .withExpiration(Jwt.dateFromNowInMinutes(10));
 
-        assertThat(token).hasSize(508);
+        assertThat(token).hasSize(476);
 
         JwtDecodeResult result = Jwt.decoder()
                 .withToken(token)
