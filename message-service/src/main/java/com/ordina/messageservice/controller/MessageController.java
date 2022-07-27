@@ -41,7 +41,7 @@ public class MessageController {
     }
 
     @GetMapping("/all")
-    public List<MessageResponse> getMessagesByUser() {
+    public List<MessageResponse> getAllMessages() {
         return messageRepository.findAll().stream()
                 .map(MessageDto::toMessageResponse)
                 .toList();
