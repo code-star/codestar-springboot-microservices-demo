@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
-import { Observable } from "rxjs";
-import { TokenResponse } from "../login/model/token-response";
-import { UserCredentials } from "../login/model/user-credentials";
+import {Observable} from "rxjs";
+import {TokenResponse} from "../login/model/token-response";
+import {UserCredentials} from "../login/model/user-credentials";
 import {Message} from "../feed/model/message";
+import {UserDetails} from "../feed/model/user-details";
 
 @Injectable({
   providedIn: 'root'
@@ -17,17 +18,25 @@ export class ApiService {
   private AUTH_URL_BASE = this.HOST + ":" + this.AUTH_PORT + this.API_BASE + this.API_VERSION
   private MESSAGE_URL_BASE = this.HOST + ":" + this.MESSAGES_PORT + this.API_BASE + this.API_VERSION
 
-  private AUTHORIZE_URL = this.AUTH_URL_BASE + "/auth"
+  private AUTH_URL = this.AUTH_URL_BASE + "/auth"
+  private AUTH_ABOUT_URL = this.AUTH_URL + "/about"
+  private AUTH_ABOUT_ME_URL = this.AUTH_ABOUT_URL + "/me"
+  private AUTH_USER_DETAILS_URL = this.AUTH_ABOUT_URL + "/user"
+
   private MESSAGE_POST_URL = this.MESSAGE_URL_BASE + "/messages"
   private MESSAGE_GET_ALL_URL = this.MESSAGE_URL_BASE + "/messages/all"
 
 
-  constructor(private httpClient: HttpClient) {
-
-  }
+  constructor(
+    private httpClient: HttpClient
+  ) {}
 
   getAccessToken(credentials: UserCredentials) : Observable<TokenResponse> {
-    return this.httpClient.post<TokenResponse>(this.AUTHORIZE_URL, credentials);
+    return this.httpClient.post<TokenResponse>(this.AUTH_URL, credentials);
+  }
+
+  getCurrentUserInfo(accessToken: string) : Observable<UserDetails> {
+    return this.httpClient.get<UserDetails>(this.AUTH_ABOUT_ME_URL, ApiService.getAuthorizationRequestOptions(accessToken));
   }
 
   getAllMessages() : Observable<Message[]> {
@@ -38,6 +47,10 @@ export class ApiService {
     return this.httpClient.post<Message>(this.MESSAGE_POST_URL, message, ApiService.getAuthorizationRequestOptions(accessToken));
   }
 
+  getUserDetails(userId: string) : Observable<UserDetails> {
+    return this.httpClient.get<UserDetails>(this.AUTH_USER_DETAILS_URL + "/" + userId);
+  }
+
   private static getAuthorizationHeader(token: string) : object {
     return new HttpHeaders({
       'Content-Type': 'application/json',
@@ -46,7 +59,7 @@ export class ApiService {
   }
 
   private static getAuthorizationRequestOptions(token: string) : object {
-    const header = {headers: ApiService.getAuthorizationHeader(token)};
-    return {headers: header};
+    const header = { headers: ApiService.getAuthorizationHeader(token) };
+    return { headers: header };
   }
 }

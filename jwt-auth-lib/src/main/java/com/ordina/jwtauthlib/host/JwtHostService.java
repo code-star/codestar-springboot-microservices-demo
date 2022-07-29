@@ -1,6 +1,7 @@
-package com.ordina.authenticationservice.security;
+package com.ordina.jwtauthlib.host;
 
 import com.ordina.jwtauthlib.Jwt;
+import com.ordina.jwtauthlib.common.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -11,15 +12,10 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class JwtService {
+public class JwtHostService {
 
     public static final int TOKEN_EXPIRATION_MINUTES = 10;
-
-    private final KeyPair keyPair;
-
-    public JwtService() {
-        keyPair = Jwt.generateKeyPair();
-    }
+    private final KeyPair keyPair = JwtUtils.generateKeyPair();
 
     public PublicKey getPublicKey() {
         return keyPair.getPublic();

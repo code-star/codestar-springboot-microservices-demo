@@ -1,16 +1,16 @@
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { RouterModule, Routes } from "@angular/router";
-import { FormsModule } from "@angular/forms";
-import { HttpClientModule } from "@angular/common/http";
+import {NgModule} from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {RouterModule, Routes} from "@angular/router";
+import {FormsModule} from "@angular/forms";
+import {HttpClientModule} from "@angular/common/http";
 
-import { AppComponent } from './app.component';
-import { NavigationComponent } from './navigation/navigation.component';
-import { NotFoundComponent } from './not-found/not-found.component';
-import { LoginComponent } from './login/login.component';
-import { FeedComponent } from './feed/feed.component';
-import { StatusComponent } from './status/status.component';
-import { MessageComponent } from './message/message.component';
+import {AppComponent} from './app.component';
+import {NavigationComponent} from './navigation/navigation.component';
+import {NotFoundComponent} from './not-found/not-found.component';
+import {LoginComponent} from './login/login.component';
+import {FeedComponent} from './feed/feed.component';
+import {StatusComponent} from './status/status.component';
+import {MessageComponent} from './message/message.component';
 
 const appRoutes: Routes = [
   {

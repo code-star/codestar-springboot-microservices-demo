@@ -1,5 +1,6 @@
-package com.ordina.jwtauthlib;
+package com.ordina.jwtauthlib.common.tokenizer;
 
+import com.ordina.jwtauthlib.common.JwtUtils;
 import io.jsonwebtoken.Jwts;
 
 import java.security.PrivateKey;
@@ -19,7 +20,7 @@ public class JwtGenerator {
     public interface NeedExpiration {
         String withExpiration(Date expiration);
         default String witExpirationInMinutes(int minutes) {
-            return withExpiration(Jwt.dateFromNowInMinutes(minutes));
+            return withExpiration(JwtUtils.dateFromNowInMinutes(minutes));
         }
     }
 

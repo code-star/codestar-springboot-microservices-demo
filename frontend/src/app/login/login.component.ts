@@ -1,8 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
 import {UserCredentials} from "./model/user-credentials";
-import {TokenResponse} from "./model/token-response";
-import {ApiService} from "../shared/api.service";
+import {LoginService} from "./login.service";
 
 @Component({
   selector: 'app-login',
@@ -16,16 +14,10 @@ export class LoginComponent implements OnInit {
     password: ''
   }
 
-  constructor(private apiService: ApiService) {}
+  constructor(private loginService: LoginService) {}
 
   onSubmit(): void {
-    console.log("Authorizing with", this.userCredentials)
-
-    this.apiService.getAccessToken(this.userCredentials).subscribe({
-        next: res => localStorage.setItem('access-token', res.token),
-        error: err => console.error(err)
-    })
-
+    this.loginService.doLogin(this.userCredentials);
   }
 
   ngOnInit(): void {}

@@ -4,14 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ordina.authenticationservice.controller.AuthController;
 import com.ordina.authenticationservice.controller.dto.UserDto;
-import com.ordina.authenticationservice.security.JwtService;
-import com.ordina.authenticationservice.security.PasswordHasher;
 import com.ordina.authenticationservice.model.UserDtoRepository;
+import com.ordina.authenticationservice.security.PasswordHasher;
 import com.ordina.authenticationservice.security.PubKeyResponse;
-import com.ordina.jwtauthlib.Jwt;
+import com.ordina.jwtauthlib.common.JwtUtils;
+import com.ordina.jwtauthlib.host.JwtHostService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,7 @@ class AuthenticationServiceApplicationTests {
     UserDtoRepository userRepository;
 
     @Autowired
-    JwtService jwtService;
+    JwtHostService jwtHostService;
 
     @Autowired
     MockMvc mockMvc;
@@ -49,13 +48,13 @@ class AuthenticationServiceApplicationTests {
     private static final String URL_BASE = "/api/v1/auth";
     private static final String URL_REGISTER = URL_BASE + "/register";
     private static final String URL_PUBLIC_KEY = URL_BASE + "/public";
+    private static final String URL_USER_DETAILS = URL_BASE + "/about/user";
 
     @Nested
     class PreloadAndAuthenticate {
         @Test
         void isDatabasePreloaded() {
             Optional<UserDto> rhiannan = userRepository.findByUsername("Rhiannan Foreman");
-            log.info("Rhianan " + rhiannan);
 
             assertThat(rhiannan).isPresent();
             assertThat(PasswordHasher.areEqual("p4ssw0rd", rhiannan.get().getPassword())).isTrue();
@@ -140,7 +139,17 @@ class AuthenticationServiceApplicationTests {
         ObjectMapper mapper = new ObjectMapper();
         PubKeyResponse pubKeyResponse = mapper.readValue(res.getResponse().getContentAsString(), new TypeReference<>() {});
 
-        assertThat(Jwt.publicKeyFromBytes(pubKeyResponse.key())).isEqualTo(jwtService.getPublicKey());
+        assertThat(JwtUtils.publicKeyFromBytes(pubKeyResponse.key())).isEqualTo(jwtHostService.getPublicKey());
+    }
+
+    @Test
+    void gettingUserDetailsById() throws Exception {
+        Optional<UserDto> rhiannan = userRepository.findByUsername("Rhiannan Foreman");
+        assertThat(rhiannan).isPresent();
+        UserDto userDto = rhiannan.get();
+
+        mockMvc.perform(get(URL_USER_DETAILS + "/" + userDto.getId()))
+                .andExpect(status().isOk());
     }
 
     private static String getUserJSONString(String username, String email, String password, Boolean enabled) {

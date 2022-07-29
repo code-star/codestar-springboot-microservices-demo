@@ -1,4 +1,6 @@
-package com.ordina.jwtauthlib;
+package com.ordina.jwtauthlib.common.tokenizer;
+
+import com.ordina.jwtauthlib.common.JwtUtils;
 
 import java.security.PublicKey;
 
@@ -13,7 +15,7 @@ public class JwtDecoder {
 
         // Utility for converting a byte array into PublicKey instance
         default JwtDecodeResult withKey(byte[] key) {
-            return withKey(Jwt.publicKeyFromBytes(key));
+            return withKey(JwtUtils.publicKeyFromBytes(key));
         }
     }
 

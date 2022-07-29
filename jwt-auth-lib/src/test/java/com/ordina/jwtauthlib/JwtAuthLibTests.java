@@ -1,19 +1,22 @@
 package com.ordina.jwtauthlib;
 
-import org.junit.jupiter.api.*;
+import com.ordina.jwtauthlib.common.JwtUtils;
+import com.ordina.jwtauthlib.common.tokenizer.JwtDecodeResult;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.security.KeyPair;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(classes = {Jwt.class})
-class JwtAuthLibApplicationTests {
+class JwtAuthLibTests {
 
     @Test
     void generateKeyPair() {
-        KeyPair keypair = Jwt.generateKeyPair();
+        KeyPair keypair = JwtUtils.generateKeyPair();
 
         assertThat(keypair).isNotNull();
         assertThat(keypair.getPrivate()).isNotNull();
@@ -28,13 +31,13 @@ class JwtAuthLibApplicationTests {
 
     @Test
     void generateAndValidateToken() {
-        KeyPair keypair = Jwt.generateKeyPair();
+        KeyPair keypair = JwtUtils.generateKeyPair();
 
         UUID uuid = UUID.randomUUID();
         String token = Jwt.generator()
                 .withKey(keypair.getPrivate())
                 .withUserId(uuid)
-                .withExpiration(Jwt.dateFromNowInMinutes(10));
+                .withExpiration(JwtUtils.dateFromNowInMinutes(10));
 
         assertThat(token).hasSize(476);
 

@@ -1,11 +1,9 @@
-package com.ordina.messageservice.security;
+package com.ordina.jwtauthlib.client;
 
 import com.ordina.jwtauthlib.Jwt;
-import com.ordina.jwtauthlib.JwtDecodeResult;
-import com.ordina.jwtauthlib.MyUserDetails;
+import com.ordina.jwtauthlib.common.tokenizer.JwtDecodeResult;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,17 +24,17 @@ import java.util.UUID;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
+    private final JwtClientService jwtClientService;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
-        this.jwtService = jwtService;
+    public JwtAuthenticationFilter(JwtClientService jwtClientService) {
+        this.jwtClientService = jwtClientService;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var decodeResult = Jwt.decoder()
                 .withToken(getJwtFromRequest(request))
-                .withKey(jwtService.getPublicKey());
+                .withKey(jwtClientService.getPublicKey());
 
         UUID userId = getUserId(decodeResult);
         setAuthentication(request, userId);
@@ -51,13 +49,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.info("User logged in with id: " + userId);
         } else {
             userId = null;
-            log.warn("User not authorised! Reason: " + decodeResult.getErrorMessage());
+            log.warn("User not authorised, reason: " + decodeResult.getErrorMessage());
         }
         return userId;
     }
 
     private void setAuthentication(@NonNull HttpServletRequest request, @Nullable UUID userId) {
-        MyUserDetails userDetails = new MyUserDetails(userId);
+        JwtUserDetails userDetails = new JwtUserDetails(userId);
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                 new UsernamePasswordAuthenticationToken(userDetails , null, userDetails.getAuthorities());
         usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

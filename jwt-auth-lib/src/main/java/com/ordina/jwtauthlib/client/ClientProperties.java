@@ -1,4 +1,4 @@
-package com.ordina.messageservice.config;
+package com.ordina.jwtauthlib.client;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,8 +8,7 @@ import org.springframework.stereotype.Service;
 @Getter
 @Setter
 @Service
-@ConfigurationProperties("ordina.message-service")
-public class ServiceConfiguration {
-
-    private String authServiceUrl;
+@ConfigurationProperties("jwt-auth-lib")
+public class ClientProperties {
+    private String publicKeyUrl;
 }

@@ -1,4 +1,4 @@
-package com.ordina.jwtauthlib;
+package com.ordina.jwtauthlib.client;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
-public class MyUserDetails implements UserDetails {
+public class JwtUserDetails implements UserDetails {
 
     private final UUID userId;
 
-    public MyUserDetails(UUID userId) {
+    public JwtUserDetails(UUID userId) {
         this.userId = userId;
     }
 

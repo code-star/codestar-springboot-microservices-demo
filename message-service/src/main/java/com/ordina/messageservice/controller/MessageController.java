@@ -1,9 +1,9 @@
 package com.ordina.messageservice.controller;
 
-import com.ordina.jwtauthlib.MyUserDetails;
+import com.ordina.jwtauthlib.client.JwtUserDetails;
+import com.ordina.messageservice.controller.dto.MessageDto;
 import com.ordina.messageservice.controller.dto.MessageRequest;
 import com.ordina.messageservice.controller.dto.MessageResponse;
-import com.ordina.messageservice.controller.dto.MessageDto;
 import com.ordina.messageservice.model.MessageDtoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,7 +28,7 @@ public class MessageController {
     @PostMapping
     @PreAuthorize("authentication.principal.id != null")
     public MessageResponse uploadMessage(@RequestBody MessageRequest messageRequest) {
-        MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        JwtUserDetails userDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         MessageDto messageDto = messageRepository.save(messageRequest, userDetails.getId());
         return messageDto.toMessageResponse();
     }

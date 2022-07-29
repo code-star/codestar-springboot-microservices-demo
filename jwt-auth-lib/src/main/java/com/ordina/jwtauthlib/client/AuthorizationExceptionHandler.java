@@ -1,4 +1,4 @@
-package com.ordina.jwtauthlib;
+package com.ordina.jwtauthlib.client;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

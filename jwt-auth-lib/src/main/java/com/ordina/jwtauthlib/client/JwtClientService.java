@@ -1,37 +1,41 @@
-package com.ordina.messageservice.security;
+package com.ordina.jwtauthlib.client;
 
-import com.ordina.jwtauthlib.Jwt;
-import com.ordina.messageservice.config.ServiceConfiguration;
-import lombok.Getter;
+import com.ordina.jwtauthlib.common.JwtUtils;
+import com.ordina.jwtauthlib.common.PubKeyResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.security.PublicKey;
 
-@Component
 @Slf4j
-public class JwtService {
+@Service
+public class JwtClientService {
 
-    private final ServiceConfiguration config;
+    private final ClientProperties config;
 
-    @Getter
-    private final PublicKey publicKey;
+    private PublicKey publicKey = null;
 
-    public JwtService(ServiceConfiguration config) {
+    public PublicKey getPublicKey() {
+        if (publicKey == null) {
+            publicKey = this.retrievePublicKey();
+        }
+        return publicKey;
+    }
+
+    public JwtClientService(ClientProperties config) {
+        log.info("JwtClientService instantiated");
         this.config = config;
-        publicKey = this.retrievePublicKey();
     }
 
     public PublicKey retrievePublicKey() {
-        log.info("Retrieving public key from webserver...");
         PubKeyResponse response = getPubKeyResponse();
 
         if (response == null) {
             throw new RuntimeException("Empty response from authentication server, is it up?");
         }
 
-        return Jwt.publicKeyFromBytes(response.key());
+        return JwtUtils.publicKeyFromBytes(response.key());
     }
 
     private PubKeyResponse getPubKeyResponse() {
@@ -43,10 +47,9 @@ public class JwtService {
     }
 
     private WebClient getWebClient() {
+        log.info("Retrieving public key from: " + config.getPublicKeyUrl());
         return WebClient.builder()
-                .baseUrl(config.getAuthServiceUrl())
+                .baseUrl(config.getPublicKeyUrl())
                 .build();
     }
-
-    public record PubKeyResponse(byte[] key) { }
 }

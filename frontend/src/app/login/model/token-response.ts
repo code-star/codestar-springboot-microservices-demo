@@ -1,3 +1,4 @@
 export interface TokenResponse {
-  token: string
+  token: string,
+  userId: string
 }

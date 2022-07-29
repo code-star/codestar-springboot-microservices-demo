@@ -1,4 +1,4 @@
-package com.ordina.jwtauthlib;
+package com.ordina.jwtauthlib.common.tokenizer;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

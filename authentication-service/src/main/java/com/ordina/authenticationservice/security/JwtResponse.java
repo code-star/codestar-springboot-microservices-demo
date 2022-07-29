@@ -1,3 +1,6 @@
 package com.ordina.authenticationservice.security;
 
-public record JwtResponse(String token) {}
+import lombok.Builder;
+
+@Builder
+public record JwtResponse(String token, String userId) {}

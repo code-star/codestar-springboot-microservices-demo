@@ -1,38 +1,42 @@
 package com.ordina.messageservice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ordina.jwtauthlib.client.ClientProperties;
 import com.ordina.jwtauthlib.Jwt;
+import com.ordina.jwtauthlib.common.JwtUtils;
+import com.ordina.jwtauthlib.common.PubKeyResponse;
 import com.ordina.messageservice.controller.dto.MessageDto;
 import com.ordina.messageservice.model.MessageDtoRepository;
-import com.ordina.messageservice.security.JwtService;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-
+import java.io.IOException;
 import java.security.KeyPair;
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-
 @Slf4j
-@SpringBootTest
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@TestMethodOrder(OrderAnnotation.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class MessageServiceApplicationTests {
 
-    static final KeyPair keyPair = Jwt.generateKeyPair();
+    public MockWebServer mockBackEnd;
+
+    static final KeyPair keyPair = JwtUtils.generateKeyPair();
     static final String URL_BASE = "/api/v1/messages";
 
     static String tokenValidUser;
@@ -41,8 +45,8 @@ class MessageServiceApplicationTests {
 
     static UUID validMessageId;
 
-    @MockBean
-    JwtService jwtService;
+    @Autowired
+    ClientProperties config;
 
     @Autowired
     MockMvc mockMvc;
@@ -52,6 +56,8 @@ class MessageServiceApplicationTests {
 
     @BeforeAll
     void createAllTokens() {
+        log.info("Creating all token...");
+
         MessageDto messageDto = messageRepository.findAll().get(0);
         UUID validId = messageDto.getUserId();
         UUID invalidId = UUID.randomUUID();
@@ -73,9 +79,23 @@ class MessageServiceApplicationTests {
                 .witExpirationInMinutes(10);
     }
 
-    @BeforeEach
-    void setup() {
-        Mockito.when(jwtService.getPublicKey()).thenReturn(keyPair.getPublic());
+    @BeforeAll
+    void startMockWebServer() throws Exception {
+        mockBackEnd = new MockWebServer();
+        mockBackEnd.start();
+
+        config.setPublicKeyUrl(mockBackEnd.url("/").toString());
+
+        PubKeyResponse response = new PubKeyResponse(keyPair.getPublic().getEncoded());
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .addHeader("Content-Type", "application/json")
+                .setBody(new ObjectMapper().writeValueAsString(response)));
+    }
+
+    @AfterAll
+    void tearDown() throws IOException {
+        mockBackEnd.shutdown();
     }
 
     @Nested
@@ -99,6 +119,7 @@ class MessageServiceApplicationTests {
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     class insertingAndRetrieveMessage {
         MessageDto message;
+        MessageDto returnedMessage;
         UUID userId = UUID.randomUUID();
         UUID messageId = UUID.randomUUID();
 
@@ -109,7 +130,7 @@ class MessageServiceApplicationTests {
                     .userId(userId)
                     .content("message content")
                     .build();
-            messageRepository.save(message);
+            returnedMessage = messageRepository.save(message);
         }
 
         @Test
@@ -119,12 +140,18 @@ class MessageServiceApplicationTests {
 
         @Test
         void findByUserId_ShouldEqualMessage() {
-            assertThat(messageRepository.findAllByUserId(message.getUserId())).contains(message);
+            assertThat(messageRepository.findAllByUserId(message.getUserId())).contains(returnedMessage);
         }
 
         @Test
         void findByMessageId_ShouldEqualMessage() {
-            assertThat(messageRepository.findById(message.getId())).get().isEqualTo(message);
+            assertThat(messageRepository.findById(message.getId())).get().isEqualTo(returnedMessage);
+        }
+
+        @Test
+        void insertedMessage_ShouldBeCreatedBeforeNow() {
+            assertThat(returnedMessage.getCreatedAt()).isBefore(Instant.now());
+            assertThat(returnedMessage.getCreatedAt()).isAfter(Instant.now().minusSeconds(10));
         }
 
         @Test

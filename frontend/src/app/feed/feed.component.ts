@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Message} from "./model/message";
 import {ApiService} from "../shared/api.service";
 
