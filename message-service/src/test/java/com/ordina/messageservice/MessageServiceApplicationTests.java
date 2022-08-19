@@ -1,10 +1,11 @@
 package com.ordina.messageservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ordina.jwtauthlib.client.ClientProperties;
 import com.ordina.jwtauthlib.Jwt;
+import com.ordina.jwtauthlib.client.ClientProperties;
 import com.ordina.jwtauthlib.common.JwtUtils;
 import com.ordina.jwtauthlib.common.PubKeyResponse;
+import com.ordina.jwtauthlib.common.tokenizer.JwtToken;
 import com.ordina.messageservice.controller.dto.MessageDto;
 import com.ordina.messageservice.model.MessageDtoRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +40,9 @@ class MessageServiceApplicationTests {
     static final KeyPair keyPair = JwtUtils.generateKeyPair();
     static final String URL_BASE = "/api/v1/messages";
 
-    static String tokenValidUser;
-    static String tokenExpiredUser;
-    static String tokenInvalidUser;
+    static JwtToken tokenValidUser;
+    static JwtToken tokenExpiredUser;
+    static JwtToken tokenInvalidUser;
 
     static UUID validMessageId;
 
@@ -178,18 +179,19 @@ class MessageServiceApplicationTests {
     @Nested
     class UploadMessage {
         @Test
-        void withValidUserId_ShouldReturnOk() throws Exception {
+        void withValidUserId_ShouldReturnCreated() throws Exception {
+            System.out.println("Bearer " + tokenValidUser.token());
             mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
-                            .header("authorization", "Bearer " + tokenValidUser)
+                            .header("authorization", "Bearer " + tokenValidUser.token())
                             .content(createMessageJSONString("Dit is een test berichtje van een valid user.")))
-                    .andExpect(status().isOk())
+                    .andExpect(status().isCreated())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON));
         }
 
         @Test
         void withExpiredToken_ShouldReturnForbidden() throws Exception {
             mockMvc.perform(post(URL_BASE).contentType(MediaType.APPLICATION_JSON)
-                            .header("authorization", "Bearer " + tokenExpiredUser)
+                            .header("authorization", "Bearer " + tokenExpiredUser.token())
                             .content(createMessageJSONString("Dit is een test berichtje van een expired user.")))
                     .andExpect(status().isForbidden());
         }

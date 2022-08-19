@@ -1,5 +1,6 @@
 package com.ordina.jwtauthlib.common.tokenizer;
 
+import com.ordina.jwtauthlib.exception.UsernameNotPresentException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -12,18 +13,16 @@ public class JwtDecodeResult {
     private Claims claims = null;
     private String errorMessage = null;
 
-    JwtDecodeResult(PublicKey key, String token) {
+    JwtDecodeResult(PublicKey key, JwtToken token) {
         try {
             this.claims = Jwts.parserBuilder()
                     .setSigningKey(key)
                     .requireIssuer("codestar")
                     .build()
-                    .parseClaimsJws(token)
+                    .parseClaimsJws(token.token())
                     .getBody();
-            if (this.claims != null) {
-                this.valid = true;
-            }
-        } catch (JwtException | IllegalArgumentException err) {
+            this.valid = this.claims != null;
+        } catch (JwtException | IllegalArgumentException | NullPointerException err) {
             this.errorMessage = err.getLocalizedMessage();
         }
     }
@@ -37,8 +36,11 @@ public class JwtDecodeResult {
     }
 
     public UUID getUserId() {
-        if (this.claims == null) return null;
+        if (!isValid()) return null;
         String uuidStr = this.claims.get("user_id", String.class);
+        if (uuidStr == null) {
+            throw new UsernameNotPresentException();
+        }
         return UUID.fromString(uuidStr);
     }
 }

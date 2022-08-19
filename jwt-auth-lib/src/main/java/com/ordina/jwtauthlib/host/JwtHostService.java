@@ -2,6 +2,7 @@ package com.ordina.jwtauthlib.host;
 
 import com.ordina.jwtauthlib.Jwt;
 import com.ordina.jwtauthlib.common.JwtUtils;
+import com.ordina.jwtauthlib.common.tokenizer.JwtToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ public class JwtHostService {
         return keyPair.getPrivate();
     }
 
-    public String getAccessTokenForUser(UUID userId) {
+    public JwtToken getAccessTokenForUser(UUID userId) {
         return Jwt.generator()
                 .withKey(getPrivateKey())
                 .withUserId(userId)

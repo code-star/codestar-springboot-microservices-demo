@@ -7,7 +7,7 @@ import java.security.PublicKey;
 public class JwtDecoder {
 
     public interface NeedToken {
-        NeedPrivateKey withToken(String token);
+        NeedPrivateKey withToken(JwtToken token);
     }
 
     public interface NeedPrivateKey {
