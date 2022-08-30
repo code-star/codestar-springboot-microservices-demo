@@ -19,9 +19,10 @@ export class ApiService {
   private MESSAGE_URL_BASE = this.HOST + ":" + this.MESSAGES_PORT + this.API_BASE + this.API_VERSION
 
   private AUTH_URL = this.AUTH_URL_BASE + "/auth"
-  private AUTH_ABOUT_URL = this.AUTH_URL + "/about"
-  private AUTH_ABOUT_ME_URL = this.AUTH_ABOUT_URL + "/me"
-  private AUTH_USER_DETAILS_URL = this.AUTH_ABOUT_URL + "/user"
+
+  private AUTH_USER_URL = this.AUTH_URL + "/user"
+  private AUTH_USER_ALL_URL = this.AUTH_USER_URL + "/all"
+  private AUTH_USER_ME_URL = this.AUTH_USER_URL + "/me"
 
   private MESSAGE_POST_URL = this.MESSAGE_URL_BASE + "/messages"
   private MESSAGE_GET_ALL_URL = this.MESSAGE_URL_BASE + "/messages/all"
@@ -36,7 +37,7 @@ export class ApiService {
   }
 
   getCurrentUserInfo(accessToken: string) : Observable<UserDetails> {
-    return this.httpClient.get<UserDetails>(this.AUTH_ABOUT_ME_URL, ApiService.getAuthorizationRequestOptions(accessToken));
+    return this.httpClient.get<UserDetails>(this.AUTH_USER_ME_URL, ApiService.getAuthorizationRequestOptions(accessToken));
   }
 
   getAllMessages() : Observable<Message[]> {
@@ -48,7 +49,7 @@ export class ApiService {
   }
 
   getUserDetails(userId: string) : Observable<UserDetails> {
-    return this.httpClient.get<UserDetails>(this.AUTH_USER_DETAILS_URL + "/" + userId);
+    return this.httpClient.get<UserDetails>(this.AUTH_USER_URL + "/" + userId);
   }
 
   private static getAuthorizationHeader(token: string) : object {

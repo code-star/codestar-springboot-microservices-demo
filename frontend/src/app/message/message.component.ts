@@ -12,21 +12,27 @@ export class MessageComponent implements OnInit {
   messageTitle: string = '';
   @Input()
   messageBody: string = '';
+  @Input()
+  messageCreated: string = '';
 
   constructor(
     private apiService: ApiService
   ) {}
 
   ngOnInit(): void {
+    this.resolveUserName()
+  }
+
+  resolveUserName() {
     this.apiService.getUserDetails(this.messageTitle).subscribe({
       next: ans => this.messageTitle = ans.username,
       error: err => console.error(err)
     })
   }
 
-  setText(title: string, body: string): void {
-    this.messageTitle = title;
-    this.messageBody = body;
+  getDateString() {
+    const date = new Date(this.messageCreated);
+    return date.toLocaleDateString() + " " + date.toLocaleTimeString()
   }
 
 }

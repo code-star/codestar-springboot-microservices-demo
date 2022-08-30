@@ -14,7 +14,7 @@
     <name>jwt-auth-lib</name>
     <description>jwt-auth-lib</description>
     <properties>
-        <java.version>18</java.version>
+        <java.version>17</java.version>
     </properties>
     <dependencies>
         <dependency>
@@ -60,7 +60,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>5.7.2</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

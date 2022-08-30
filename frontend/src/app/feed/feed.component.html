@@ -6,7 +6,8 @@
     <h5 class="my-3">Messages</h5>
     <app-message *ngFor="let message of messages"
                  [messageBody]="message.content"
-                 [messageTitle]="message.userId">
+                 [messageTitle]="message.userId"
+                 [messageCreated]="message.createdAt">
     </app-message>
   </div>
 </div>
