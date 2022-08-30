@@ -2,6 +2,8 @@ package com.ordina.jwtauthlib.client;
 
 import com.ordina.jwtauthlib.common.JwtUtils;
 import com.ordina.jwtauthlib.common.PubKeyResponse;
+import com.ordina.jwtauthlib.exception.EmptyKeyResponseException;
+import com.ordina.jwtauthlib.exception.PubKeyResponseParserException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -24,7 +26,6 @@ public class JwtClientService {
     }
 
     public JwtClientService(ClientProperties config) {
-        log.info("JwtClientService instantiated");
         this.config = config;
     }
 
@@ -32,7 +33,7 @@ public class JwtClientService {
         PubKeyResponse response = getPubKeyResponse();
 
         if (response == null) {
-            throw new RuntimeException("Empty response from authentication server, is it up?");
+            throw new EmptyKeyResponseException();
         }
 
         return JwtUtils.publicKeyFromBytes(response.key());
@@ -42,7 +43,7 @@ public class JwtClientService {
         return getWebClient().get()
                 .retrieve()
                 .bodyToMono(PubKeyResponse.class)
-                .doOnError(err -> { throw new RuntimeException(err); })
+                .doOnError(err -> { throw new PubKeyResponseParserException(err); })
                 .block();
     }
 

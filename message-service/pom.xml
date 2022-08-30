@@ -14,7 +14,7 @@
     <name>message-service</name>
     <description>message-service</description>
     <properties>
-        <java.version>18</java.version>
+        <java.version>17</java.version>
     </properties>
     <dependencies>
         <dependency>
@@ -82,6 +82,10 @@
             <artifactId>mockwebserver</artifactId>
             <version>4.10.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
         </dependency>
     </dependencies>
 

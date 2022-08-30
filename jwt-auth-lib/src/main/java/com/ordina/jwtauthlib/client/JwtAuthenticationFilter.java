@@ -1,16 +1,14 @@
 package com.ordina.jwtauthlib.client;
 
 import com.ordina.jwtauthlib.Jwt;
-import com.ordina.jwtauthlib.common.tokenizer.JwtDecodeResult;
+import com.ordina.jwtauthlib.common.JwtUtils;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -33,25 +31,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var decodeResult = Jwt.decoder()
-                .withToken(getJwtFromRequest(request))
+                .withToken(JwtUtils.getJwtFromRequest(request))
                 .withKey(jwtClientService.getPublicKey());
 
-        UUID userId = getUserId(decodeResult);
+        UUID userId = decodeResult.getUserId();
         setAuthentication(request, userId);
 
         filterChain.doFilter(request, response);
-    }
-
-    private UUID getUserId(JwtDecodeResult decodeResult) {
-        UUID userId;
-        if(decodeResult.isValid()) {
-            userId = decodeResult.getUserId();
-            log.info("User logged in with id: " + userId);
-        } else {
-            userId = null;
-            log.warn("User not authorised, reason: " + decodeResult.getErrorMessage());
-        }
-        return userId;
     }
 
     private void setAuthentication(@NonNull HttpServletRequest request, @Nullable UUID userId) {
@@ -60,13 +46,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 new UsernamePasswordAuthenticationToken(userDetails , null, userDetails.getAuthorities());
         usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-    }
-
-    private String getJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        return null;
     }
 }

@@ -37,6 +37,6 @@ public class MessageDto {
     }
 
     public MessageResponse toMessageResponse() {
-        return new MessageResponse(this.content, this.userId);
+        return new MessageResponse(this.content, this.userId, this.createdAt);
     }
 }

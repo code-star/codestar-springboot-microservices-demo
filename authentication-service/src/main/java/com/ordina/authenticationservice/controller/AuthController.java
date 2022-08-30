@@ -10,26 +10,20 @@ import com.ordina.authenticationservice.model.UserDtoRepository;
 import com.ordina.authenticationservice.security.JwtResponse;
 import com.ordina.authenticationservice.security.PubKeyResponse;
 import com.ordina.jwtauthlib.host.JwtHostService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
-
 @Slf4j
 @CrossOrigin
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final UserDtoRepository userRepository;
     private final JwtHostService jwtHostService;
-
-    public AuthController(UserDtoRepository userRepository, JwtHostService jwtHostService) {
-        this.userRepository = userRepository;
-        this.jwtHostService = jwtHostService;
-    }
 
     @PostMapping
     public JwtResponse authenticate(@RequestBody UserCredentials credentials) {
@@ -56,26 +50,4 @@ public class AuthController {
         byte[] encodedKey = jwtHostService.getPublicKey().getEncoded();
         return new PubKeyResponse(encodedKey);
     }
-
-    // TODO: remove, is for debugging
-    @GetMapping("/about/user/all")
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(UserDto::toUserResponse)
-                .toList();
-    }
-
-    @GetMapping("/about/user/{userId}")
-    public UserResponse getUserDetails(@PathVariable String userId) {
-        UserDto userDto = userRepository.findByUserId(UUID.fromString(userId))
-                .orElseThrow(UserNotFoundException::new);
-        return userDto.toUserResponse();
-    }
-
-//    @GetMapping("/about/me")
-//    public UserResponse getCurrentUserDetails() {
-//        UserDto userDto = userRepository.findByUserId(UUID.fromString(userId))
-//                .orElseThrow(UserNotFoundException::new);
-//        return userDto.toUserResponse();
-//    }
 }

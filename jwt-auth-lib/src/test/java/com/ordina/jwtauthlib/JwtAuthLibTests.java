@@ -2,6 +2,7 @@ package com.ordina.jwtauthlib;
 
 import com.ordina.jwtauthlib.common.JwtUtils;
 import com.ordina.jwtauthlib.common.tokenizer.JwtDecodeResult;
+import com.ordina.jwtauthlib.common.tokenizer.JwtToken;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -34,16 +35,18 @@ class JwtAuthLibTests {
         KeyPair keypair = JwtUtils.generateKeyPair();
 
         UUID uuid = UUID.randomUUID();
-        String token = Jwt.generator()
+        JwtToken token = Jwt.generator()
                 .withKey(keypair.getPrivate())
                 .withUserId(uuid)
                 .withExpiration(JwtUtils.dateFromNowInMinutes(10));
 
-        assertThat(token).hasSize(476);
+        assertThat(token.token()).hasSize(476);
 
         JwtDecodeResult result = Jwt.decoder()
                 .withToken(token)
                 .withKey(keypair.getPublic().getEncoded());
+
+        System.out.println(result.getErrorMessage());
 
         assertThat(result.isValid()).isTrue();
         assertThat(result.getUserId()).isNotNull();

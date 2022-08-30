@@ -16,4 +16,6 @@ interface MessageRepository extends CrudRepository<Message, UUID> {
 
     List<Message> findAll();
 
+    List<Message> findAllByOrderByCreatedAtDesc();
+
 }

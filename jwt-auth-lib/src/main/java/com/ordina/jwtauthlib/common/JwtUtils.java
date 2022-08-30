@@ -1,8 +1,12 @@
 package com.ordina.jwtauthlib.common;
 
+import com.ordina.jwtauthlib.common.tokenizer.JwtToken;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.http.HttpHeaders;
+import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -30,5 +34,13 @@ public interface JwtUtils {
         } catch (NoSuchAlgorithmException | InvalidKeySpecException err) {
             throw new RuntimeException(err.getLocalizedMessage(), err.getCause());
         }
+    }
+
+    static JwtToken getJwtFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return new JwtToken(bearerToken.substring(7));
+        }
+        return null;
     }
 }

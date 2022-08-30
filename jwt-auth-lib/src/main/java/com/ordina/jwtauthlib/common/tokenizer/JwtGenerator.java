@@ -18,8 +18,8 @@ public class JwtGenerator {
     }
 
     public interface NeedExpiration {
-        String withExpiration(Date expiration);
-        default String witExpirationInMinutes(int minutes) {
+        JwtToken withExpiration(Date expiration);
+        default JwtToken witExpirationInMinutes(int minutes) {
             return withExpiration(JwtUtils.dateFromNowInMinutes(minutes));
         }
     }
@@ -28,11 +28,11 @@ public class JwtGenerator {
         return key
             -> userId
             -> expiration
-            -> Jwts.builder()
+            -> new JwtToken(Jwts.builder()
                 .setExpiration(expiration)
                 .signWith(key)
                 .claim("user_id", userId.toString())
                 .setIssuer("codestar")
-                .compact();
+                .compact());
     }
 }

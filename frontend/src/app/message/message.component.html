@@ -1,6 +1,8 @@
 <div class="card my-2">
   <div class="card-body">
-    <h5 class="card-title">{{ messageTitle }}</h5>
-    <p class="card-text">{{ messageBody }}</p>
+    <h5 class="card-title d-inline">{{ messageTitle }}</h5>
+    <h6 class="text-muted fw-normal d-inline ps-2">{{ getDateString() }}</h6>
+    <hr class="my-1"/>
+    <p class="card-text fs-3">{{ messageBody }}</p>
   </div>
 </div>
