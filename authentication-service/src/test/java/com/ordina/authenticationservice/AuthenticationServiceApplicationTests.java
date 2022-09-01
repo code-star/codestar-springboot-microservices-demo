@@ -48,7 +48,7 @@ class AuthenticationServiceApplicationTests {
     private static final String URL_BASE = "/api/v1/auth";
     private static final String URL_REGISTER = URL_BASE + "/register";
     private static final String URL_PUBLIC_KEY = URL_BASE + "/public";
-    private static final String URL_USER_DETAILS = URL_BASE + "/about/user";
+    private static final String URL_USER_DETAILS = URL_BASE + "/user";
 
     @Nested
     class PreloadAndAuthenticate {

@@ -18,7 +18,7 @@ public class UserLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        loadUserObjects();
+//        loadUserObjects();
     }
 
     private synchronized void loadUserObjects() {

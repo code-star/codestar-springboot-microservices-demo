@@ -1,10 +1,12 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {TokenResponse} from "../login/model/token-response";
+import {TokenResponse} from "./model/token-response";
 import {UserCredentials} from "../login/model/user-credentials";
 import {Message} from "../feed/model/message";
 import {UserDetails} from "../feed/model/user-details";
+import {UserRequest} from "../register/model/user-request";
+import {Content} from "../feed/model/content";
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +23,7 @@ export class ApiService {
   private AUTH_URL = this.AUTH_URL_BASE + "/auth"
 
   private AUTH_USER_URL = this.AUTH_URL + "/user"
+  private AUTH_REGISTER_URL = this.AUTH_URL + "/register"
   private AUTH_USER_ALL_URL = this.AUTH_USER_URL + "/all"
   private AUTH_USER_ME_URL = this.AUTH_USER_URL + "/me"
 
@@ -37,30 +40,22 @@ export class ApiService {
   }
 
   getCurrentUserInfo(accessToken: string) : Observable<UserDetails> {
-    return this.httpClient.get<UserDetails>(this.AUTH_USER_ME_URL, ApiService.getAuthorizationRequestOptions(accessToken));
+    return this.httpClient.get<UserDetails>(this.AUTH_USER_ME_URL);
   }
 
   getAllMessages() : Observable<Message[]> {
     return this.httpClient.get<Message[]>(this.MESSAGE_GET_ALL_URL);
   }
 
-  postMessage(message: Message, accessToken: string) : Observable<Message> {
-    return this.httpClient.post<Message>(this.MESSAGE_POST_URL, message, ApiService.getAuthorizationRequestOptions(accessToken));
+  postMessage(message: Content, accessToken: string) : Observable<Message> {
+    return this.httpClient.post<Message>(this.MESSAGE_POST_URL, message);
   }
 
-  getUserDetails(userId: string) : Observable<UserDetails> {
+  getUserDetails(userId?: string) : Observable<UserDetails> {
     return this.httpClient.get<UserDetails>(this.AUTH_USER_URL + "/" + userId);
   }
 
-  private static getAuthorizationHeader(token: string) : object {
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
-  private static getAuthorizationRequestOptions(token: string) : object {
-    const header = { headers: ApiService.getAuthorizationHeader(token) };
-    return { headers: header };
+  registerUser(userRequest: UserRequest): Observable<TokenResponse> {
+    return this.httpClient.post<TokenResponse>(this.AUTH_REGISTER_URL, userRequest);
   }
 }

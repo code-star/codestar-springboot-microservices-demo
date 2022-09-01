@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {ActiveUserService} from "../shared/active-user.service";
 
 @Component({
   selector: 'app-navigation',
@@ -9,7 +10,9 @@ export class NavigationComponent implements OnInit {
 
   navbarTitle = "Microservices Demo";
 
-  constructor() { }
+  constructor(
+    public activeUserService: ActiveUserService
+  ) {}
 
   ngOnInit(): void {
   }

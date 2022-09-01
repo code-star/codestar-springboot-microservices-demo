@@ -18,7 +18,7 @@ public class MessageLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        loadMessageObjects();
+//        loadMessageObjects();
     }
 
     private synchronized void loadMessageObjects() {

@@ -4,4 +4,4 @@ import com.ordina.jwtauthlib.common.tokenizer.JwtToken;
 import lombok.Builder;
 
 @Builder
-public record JwtResponse(JwtToken token, String userId) {}
+public record JwtResponse(String token, String userId) {}
