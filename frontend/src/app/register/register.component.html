@@ -7,7 +7,15 @@
                class="form-control"
                id="inputUsername"
                name="username"
-               [(ngModel)]="userCredentials.username">
+               [(ngModel)]="userRequest.username">
+      </div>
+      <div class="mb-3">
+        <label for="inputEmail" class="form-label">Email</label>
+        <input type="text"
+               class="form-control"
+               id="inputEmail"
+               name="email"
+               [(ngModel)]="userRequest.email">
       </div>
       <div class="mb-3">
         <label for="inputPassword" class="form-label">Password</label>
@@ -15,9 +23,9 @@
                class="form-control"
                id="inputPassword"
                name="password"
-               [(ngModel)]="userCredentials.password">
+               [(ngModel)]="userRequest.password">
       </div>
-      <button type="submit" class="btn btn-primary">Login</button>
+      <button type="submit" class="btn btn-primary">Register</button>
     </form>
   </div>
 </div>

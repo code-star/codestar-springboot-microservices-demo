@@ -1,0 +1,10 @@
+<form (submit)="onSubmit()" class="my-3">
+  <label for="messageText">Post a nice message!</label>
+  <textarea
+    class="form-control my-2"
+    id="messageText"
+    placeholder="Write text here..."
+    name="message-text"
+    [(ngModel)]="text"></textarea>
+  <button type="submit" class="btn btn-primary">Post</button>
+</form>

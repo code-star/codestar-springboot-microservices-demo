@@ -3,7 +3,6 @@ package com.ordina.authenticationservice.controller;
 import com.ordina.authenticationservice.controller.dto.UserCredentials;
 import com.ordina.authenticationservice.controller.dto.UserDto;
 import com.ordina.authenticationservice.controller.dto.UserRequest;
-import com.ordina.authenticationservice.controller.dto.UserResponse;
 import com.ordina.authenticationservice.exception.InvalidPasswordException;
 import com.ordina.authenticationservice.exception.UserNotFoundException;
 import com.ordina.authenticationservice.model.UserDtoRepository;
@@ -35,14 +34,19 @@ public class AuthController {
 
         return JwtResponse.builder()
                 .userId(user.getId().toString())
-                .token(jwtHostService.getAccessTokenForUser(user.getId()))
+                .token(jwtHostService.getAccessTokenForUser(user.getId()).token())
                 .build();
     }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse register(@RequestBody UserRequest userRequest) {
-        return userRepository.save(userRequest).toUserResponse();
+    public JwtResponse register(@RequestBody UserRequest userRequest) {
+        UserDto userDto = userRepository.save(userRequest);
+
+        return JwtResponse.builder()
+                .userId(userDto.getId().toString())
+                .token(jwtHostService.getAccessTokenForUser(userDto.getId()).token())
+                .build();
     }
 
     @GetMapping("/public")

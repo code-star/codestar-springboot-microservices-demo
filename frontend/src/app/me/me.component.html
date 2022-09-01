@@ -1,0 +1,25 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8">
+    <form class="mt-3">
+      <div class="mb-3">
+        <label for="inputUsername" class="form-label">Username</label>
+        <input type="text"
+               class="form-control"
+               id="inputUsername"
+               name="username"
+               disabled
+               value="{{ activeUserService.getUsername() }}">
+      </div>
+      <div class="mb-3">
+        <label for="inputEmail" class="form-label">Email</label>
+        <input type="text"
+               class="form-control"
+               id="inputEmail"
+               name="email"
+               disabled
+               value="{{ activeUserService.getEmail() }}">
+      </div>
+      <button (click)="activeUserService.logOut()" class="btn btn-primary">Log out</button>
+    </form>
+  </div>
+</div>

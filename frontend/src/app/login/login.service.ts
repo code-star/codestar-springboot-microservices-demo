@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {UserDetails} from "../feed/model/user-details";
 import {UserCredentials} from "./model/user-credentials";
 import {ApiService} from "../shared/api.service";
+import {ActiveUserService} from "../shared/active-user.service";
 
 @Injectable({
   providedIn: 'root'
@@ -11,32 +12,16 @@ export class LoginService {
   userDetails: UserDetails | null = null;
 
   constructor(
-    private apiService: ApiService
+    private apiService: ApiService,
+    private activeUserService: ActiveUserService
   ) {}
 
   doLogin(userCredentials: UserCredentials) {
     console.log("Authorizing with", userCredentials)
 
     this.apiService.getAccessToken(userCredentials).subscribe({
-      next: res => {
-        localStorage.setItem('access-token', res.token)
-        this.userDetails = {
-          userId: res.userId,
-          username: "",
-          email: ""
-        }
-      },
+      next: value => this.activeUserService.setActiveUser(value),
       error: err => console.error(err)
     })
   }
-
-  private aboutMe() {
-    let token = localStorage.getItem('access-token');
-    if (token == null) {
-      console.error("User not logged in.")
-      return;
-    }
-
-  }
-
 }

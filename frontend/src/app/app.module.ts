@@ -2,7 +2,7 @@ import {NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {RouterModule, Routes} from "@angular/router";
 import {FormsModule} from "@angular/forms";
-import {HttpClientModule} from "@angular/common/http";
+import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 
 import {AppComponent} from './app.component';
 import {NavigationComponent} from './navigation/navigation.component';
@@ -10,7 +10,12 @@ import {NotFoundComponent} from './not-found/not-found.component';
 import {LoginComponent} from './login/login.component';
 import {FeedComponent} from './feed/feed.component';
 import {StatusComponent} from './status/status.component';
-import {MessageComponent} from './message/message.component';
+import {MessageComponent} from './feed/message/message.component';
+import {RegisterComponent} from './register/register.component';
+
+import {AuthInterceptor} from "./shared/auth.interceptor";
+import { MeComponent } from './me/me.component';
+import { PostMessageComponent } from './feed/post-message/post-message.component';
 
 const appRoutes: Routes = [
   {
@@ -21,6 +26,14 @@ const appRoutes: Routes = [
   {
     path: 'login',
     component: LoginComponent
+  },
+  {
+    path: 'register',
+    component: RegisterComponent
+  },
+  {
+    path: 'me',
+    component: MeComponent
   },
   {
     path: 'status',
@@ -40,7 +53,10 @@ const appRoutes: Routes = [
     LoginComponent,
     FeedComponent,
     StatusComponent,
-    MessageComponent
+    MessageComponent,
+    RegisterComponent,
+    MeComponent,
+    PostMessageComponent
   ],
   imports: [
     BrowserModule,
@@ -48,7 +64,9 @@ const appRoutes: Routes = [
     FormsModule,
     RouterModule.forRoot(appRoutes)
   ],
-  providers: [],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

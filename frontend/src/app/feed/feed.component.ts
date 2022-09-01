@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {Message} from "./model/message";
 import {ApiService} from "../shared/api.service";
+import {ActiveUserService} from "../shared/active-user.service";
+import {FeedService} from "./feed.service";
 
 @Component({
   selector: 'app-feed',
@@ -8,14 +10,22 @@ import {ApiService} from "../shared/api.service";
   styleUrls: ['./feed.component.css']
 })
 export class FeedComponent implements OnInit {
+
   messages: Message[] = [];
 
   constructor(
-    private apiService: ApiService
+    public activeUserService: ActiveUserService,
+    private apiService: ApiService,
+    private feedService: FeedService
   ) {}
 
   ngOnInit(): void {
-    this.getAllMessages();
+    this.feedService.onUpdateFeed().subscribe({
+      next: () => this.getAllMessages(),
+      error: err => console.error(err)
+    })
+
+    this.feedService.updateFeed()
   }
 
   getAllMessages() : void {
@@ -24,5 +34,4 @@ export class FeedComponent implements OnInit {
       error: err => console.error(err)
     })
   }
-
 }

@@ -1,8 +1,8 @@
 <div class="row">
-  <div class="col-2" id="side-panel">
-
+  <div *ngIf="activeUserService.isUserLoggedIn()" class="col-12">
+    <app-post-message></app-post-message>
   </div>
-  <div class="col-10" id="left-col">
+  <div class="col-12">
     <h5 class="my-3">Messages</h5>
     <app-message *ngFor="let message of messages"
                  [messageBody]="message.content"

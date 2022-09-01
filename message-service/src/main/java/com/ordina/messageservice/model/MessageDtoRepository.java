@@ -29,7 +29,7 @@ public class MessageDtoRepository {
     }
 
     public List<MessageDto> findAll() {
-        return repository.findAll().stream()
+        return repository.findAllByOrderByCreatedAtDesc().stream()
                 .map(MessageDto::new)
                 .toList();
     }

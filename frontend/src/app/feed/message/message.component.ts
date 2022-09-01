@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {ApiService} from "../shared/api.service";
+import {ApiService} from "../../shared/api.service";
 
 @Component({
   selector: 'app-message',
@@ -25,7 +25,7 @@ export class MessageComponent implements OnInit {
 
   resolveUserName() {
     this.apiService.getUserDetails(this.messageTitle).subscribe({
-      next: ans => this.messageTitle = ans.username,
+      next: value => this.messageTitle = value.username,
       error: err => console.error(err)
     })
   }
